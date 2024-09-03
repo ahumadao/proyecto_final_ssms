@@ -1,0 +1,89 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Introducción a R Markdown
+
+Este es un archivo R notebook. Permite escribir en formato Markdown, un formato de texto que permite utilizar elementos de formato en un documento de texto plano. Entre estos elementos se puede utilizar títulos, listas de puntos, links a urls, entre otros. Para ejecutar el código, se puede presionar el botón de play de color verde en cada celda.
+
+Se puede añadir un nuevo bloque de código haciendo clic en el botón del menú "Insertar" de la barra de herramientas o pulsando Ctrl+Alt+I. Al presionar el botón guardar, se generará junto a él un archivo HTML que contiene el código y el resultado (hay un botón Vista previa o Ctrl+Mayús+K para previsualizar el archivo HTML). La vista previa muestra una copia HTML renderizada del contenido del editor. La Vista Previa no ejecuta ningún chunk de código R. En su lugar, se muestra la salida del chunk cuando se ejecutó por última vez en el editor.
+
+```{r include=FALSE}
+
+pacman::p_load(
+  readxl, #importar archivos excel
+  tidyverse, #manejo de datos
+  here,       # directorios relativos
+  janitor,    # limpiar dataframes
+  lubridate,  # trabajar con fechas
+  labelled,    # añadir 
+  summarytools,
+  rio
+)
+```
+
+A continuación, se presentarán las actividades a realizar para el final de las sesiones. Se deberá manejar los datos, procesarlos y generar las tablas y gráficos en los bloques de código mencionados.
+
+## Actividad
+
+### 1. Importar, explorar y conocer los datos
+
+```{r warning=FALSE, include=FALSE}
+# Importar y sintetizar datos del DEIS ----
+
+data_deis <- import(here("data","deis2024.xlsx")) %>% #importo datos
+  clean_names() %>% #normalizo los nombres nombres de las columnas
+  select(codigo_vigente, nombre_oficial, nombre_comuna, nivel_de_atencion, nombre_dependencia_jerarquica_seremi_servicio_de_salud)  %>% 
+  mutate(codigo_vigente = as.character(codigo_vigente)) %>%
+  filter(nombre_dependencia_jerarquica_seremi_servicio_de_salud == 'Servicio de Salud Metropolitano Sur')
+
+# Importar datos especialidades ----
+
+especialidades <- import(here("data","especialidades.xlsx")) %>%
+  clean_names() %>%
+  select(codigosigte, desc820) %>%
+  rename(
+    codigo_sigte = codigosigte,
+    desc_especialidad = desc820
+    )
+
+# Importar datos de LE anonimizada ----
+
+data_bruta <- import(here("data","data_le_anonima.xlsx"))
+
+data_procesada <- data_bruta %>%
+  clean_names() %>%  # limpio los nombres de las columnas
+  left_join(data_deis %>%  #junto los dataframes para obtener el est dest
+              select(codigo_vigente,
+                     nombre_oficial), 
+            by=c('estab_dest'='codigo_vigente')) %>%
+  rename(establecimiento_destino = nombre_oficial) %>% # renombro para evitar duplicidad de nombres
+  left_join(data_deis %>% #junto los dataframes para obtener el est orig, comuna, nivel de atención
+              select(codigo_vigente,
+                     nombre_oficial, 
+                     nombre_comuna, 
+                     nivel_de_atencion), 
+            by=c('estab_orig'='codigo_vigente')) %>%
+  rename(establecimiento_origen = nombre_oficial) %>% # renombro para evitar duplicidad de nombres
+  left_join(especialidades, by=c('presta_min'='codigo_sigte')) %>% # combino con especialidades
+  left_join( # combino con dataframe de abreviaciones
+    import(here('data','abreviacion.xlsx')) %>% 
+      clean_names() %>% 
+      mutate(codigo_vigente = as.character(codigo_vigente)), 
+    by=c('estab_dest'='codigo_vigente')) %>%
+  rename('abrev_destino'='abreviacion') %>% 
+  select(-presta_min,-comuna,-estab_orig,-estab_dest) %>%
+  select(run, sexo, fecha_nac, 
+         establecimiento_origen, nombre_comuna, nivel_de_atencion, f_entrada, sospecha_diag, 
+         establecimiento_destino, abrev_destino, desc_especialidad, presta_est, 
+         f_salida, c_salida ) 
+```
+
+Luego de importar y procesar, realizar un análisis exploratorio simple. Por ejemplo, si necesitamos saber cuántas , filas tiene el dataframe se puede incorporar `r nrows(data_procesada).`
+
+### 2. Definir pregunta de investigación
+
+(escribir aquí)
+
+### 3. Generar estadísticas asociadas a la pregunta de investigación 
