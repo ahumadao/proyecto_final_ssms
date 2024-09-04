@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Introducción a R Markdown
@@ -9,7 +11,7 @@ Este es un archivo R notebook. Permite escribir en formato Markdown, un formato 
 
 Se puede añadir un nuevo bloque de código haciendo clic en el botón del menú "Insertar" de la barra de herramientas o pulsando Ctrl+Alt+I. Al presionar el botón guardar, se generará junto a él un archivo HTML que contiene el código y el resultado (hay un botón Vista previa o Ctrl+Mayús+K para previsualizar el archivo HTML). La vista previa muestra una copia HTML renderizada del contenido del editor. La Vista Previa no ejecuta ningún chunk de código R. En su lugar, se muestra la salida del chunk cuando se ejecutó por última vez en el editor.
 
-```{r include=FALSE}
+```{r echo=TRUE}
 
 pacman::p_load(
   readxl, #importar archivos excel
@@ -29,7 +31,7 @@ A continuación, se presentarán las actividades a realizar para el final de las
 
 ### 1. Importar, explorar y conocer los datos
 
-```{r warning=FALSE, include=FALSE}
+```{r echo=TRUE, warning=FALSE}
 # Importar y sintetizar datos del DEIS ----
 
 data_deis <- import(here("data","deis2024.xlsx")) %>% #importo datos
@@ -80,10 +82,24 @@ data_procesada <- data_bruta %>%
          f_salida, c_salida ) 
 ```
 
-Luego de importar y procesar, realizar un análisis exploratorio simple. Por ejemplo, si necesitamos saber cuántas , filas tiene el dataframe se puede incorporar `r nrows(data_procesada).`
+Luego de importar y procesar, realizar un análisis exploratorio simple. Por ejemplo, si necesitamos saber cuántas , filas tiene el dataframe se puede incorporar un código "inline". Como por ejemplo, este número: `r format(nrow(data_procesada), big.mark = ".", decimal.mark = ",", scientific = FALSE)`
 
 ### 2. Definir pregunta de investigación
 
 (escribir aquí)
 
-### 3. Generar estadísticas asociadas a la pregunta de investigación 
+### 3. Generar estadísticas (tablas) asociadas a la pregunta de investigación
+
+```{r}
+
+```
+
+(escribir aquí)
+
+### 4. Graficar
+
+```{r}
+
+```
+
+### 5. Conclusiones finales.
